@@ -4,12 +4,11 @@ extends Node2D
 
 @export var character: CharacterGame:
 	set(value):
-		if character and character.changed.is_connected(_on_character_changed):
+		if character != null and character.changed.is_connected(_on_character_changed):
 			character.changed.disconnect(_on_character_changed)
 		character = value
-		if character:
-			if not character.changed.is_connected(_on_character_changed):
-				character.changed.connect(_on_character_changed)
+		if character != null and not character.changed.is_connected(_on_character_changed):
+			character.changed.connect(_on_character_changed)
 		_actualizar_graficos()
 
 @export_group("Controladores")
@@ -21,11 +20,22 @@ extends Node2D
 @onready var ShadowSprite: Sprite2D = $Sprite/Shadow
 
 var EstaCorriendo: bool = false
+var _ultimo_graphic: int = -1
+var _ultimo_shadow: int = -1
 
 func _ready() -> void:
-	if character and not character.changed.is_connected(_on_character_changed):
+	if character != null and not character.changed.is_connected(_on_character_changed):
 		character.changed.connect(_on_character_changed)
 	_actualizar_graficos()
+
+func _process(_delta: float) -> void:
+	# Solo en el editor: detecta cambios aunque la señal falle
+	if not Engine.is_editor_hint():
+		return
+	if character == null:
+		return
+	if character.charGraphic != _ultimo_graphic or character.charShadowGraphic != _ultimo_shadow:
+		_actualizar_graficos()
 
 func _on_character_changed() -> void:
 	_actualizar_graficos()
@@ -37,7 +47,16 @@ func _actualizar_graficos() -> void:
 		return
 	if AnimacionChar == null:
 		return
-	graphicsController.AplicarGraficos(AnimacionChar, ShadowSprite, character.charGraphic, character.charShadowGraphic)
+
+	_ultimo_graphic = character.charGraphic
+	_ultimo_shadow = character.charShadowGraphic
+
+	graphicsController.AplicarGraficos(
+		AnimacionChar,
+		ShadowSprite,
+		character.charGraphic,
+		character.charShadowGraphic
+	)
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():

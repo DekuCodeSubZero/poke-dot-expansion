@@ -41,3 +41,11 @@ func CambiarSpritesheet(Animacion: AnimatedSprite2D, GraphicID: ObjEvents.owID) 
 	Animacion.sprite_frames = nuevos_frames
 	if Engine.is_editor_hint():
 		Animacion.queue_redraw()
+	var anim_actual = Animacion.animation
+	var frame_actual = Animacion.frame
+
+	Animacion.sprite_frames = null
+	Animacion.sprite_frames = nuevos_frames
+	Animacion.animation = anim_actual
+	Animacion.frame = frame_actual
+	Animacion.queue_redraw()
