@@ -1,26 +1,58 @@
 Movemente Controller:
 	es un script dirigido a solo calculo del movimiento de una entidad con solo
 	un método del tipo función que retorna un valor para la posición de la entidad
-	recibe argumentos de la entidad, su tipo de entidad (PlayerData o NpcData), la
-	dirección, si esta corriendo y el delta, esto es importante trabajarlo desde el
-	physic_process ya que ahi tenemos a delta ya que a diferencia del process que se
-	ejecuta cada frame, este se ejecuta a un ritmo fijo y constante, dentro del método tipo
-	función AplicarMovimiento(...) tenemos la verificacion de si la direccion es
-	diferente a Vector2.ZERO que no hace saber si hay un cambio de dirección, luego
-	se hacen los calculos en base a los datos heredados del character y el delta junto
-	a un dato global TileSize, con esto efectuamos el calculo y luego nos aseguramos de
-	que la nueva posicion sea igual a targetdireccion que seria el destino exacto para efectuar
-	el movimiento por casillas, esto se devuelve al script que solicito el calculo.
+	recibe argumentos de la entidad, su tipo de entidad (CharacterGame, ya sea
+	PlayerData o NpcData), la dirección, si esta corriendo y el delta, esto es
+	importante trabajarlo desde el physic_process ya que ahi tenemos a delta ya que
+	a diferencia del process que se ejecuta cada frame, este se ejecuta a un ritmo
+	fijo y constante, dentro del método tipo función AplicarMovimiento(...) tenemos
+	la verificacion de si la direccion es diferente a Vector2.ZERO que nos hace
+	saber si hay un cambio de dirección, luego se hacen los calculos en base a los
+	datos heredados del character y el delta junto a un dato global TileSize, con
+	esto efectuamos el calculo y luego nos aseguramos de que la nueva posicion sea
+	igual a TargetDireccion que seria el destino exacto para efectuar el movimiento
+	por casillas, esto se devuelve al script que solicito el calculo.
 
 Anim Controller:
-	es un script dirigido a orquestar las animaciones de la entidad, contiende dos
+	es un script dirigido a orquestar las animaciones de la entidad, contiene dos
 	métodos, uno del tipo procedimiento y el otro del tipo función, el importante
-	es el primero que se usa para determinar la animacion, el segundo es más un auxiliar
-	para el primero con el cual checamos la direccion y en base a eso le regresa
-	al método protagonista un dato string con el cual trabajaremos, el método principal
-	recibe de quien es la animacion que en este caso es AnimatedSprite2D,  la dirección,
-	si se mueve, esta corriendo o es primer paso, este ultimo es importante para la animación
-	natural al caminar o correr ya que alternaremos entre primer paso y segundo para mayor
-	naturalidad, esto es gracias a que en MovementController.AplicarMovimiento hay una especie
-	de bucle donde el EsPrimerPaso se niega en cada paso y este mismo se lo enviamos a
-	AplicarAnimmacion.
+	es el primero que se usa para determinar la animacion, el segundo es más un
+	auxiliar para el primero con el cual checamos la direccion y en base a eso le
+	regresa al método protagonista un dato string con el cual trabajaremos, el
+	método principal recibe de quien es la animacion que en este caso es
+	AnimatedSprite2D, la dirección, si se mueve, esta corriendo o es primer paso,
+	este ultimo es importante para la animación natural al caminar o correr ya que
+	alternaremos entre primer paso y segundo para mayor naturalidad, esto es
+	gracias a que en MovementController.AplicarMovimiento hay una especie de bucle
+	donde el EsPrimerPaso se niega en cada paso y este mismo se lo enviamos a
+	AplicarAnimacion.
+
+Graphics Controller:
+	es un script dirigido a cambiar los graficos de la entidad, tanto el spritesheet
+	del personaje como su sombra, no calcula movimiento ni elige la animacion, solo
+	aplica lo que ya trae el CharacterGame, el método protagonista es
+	AplicarGraficos(...) y este recibe el AnimatedSprite2D, el Sprite2D de la sombra
+	y el CharacterGame, de ahi se reparte en dos, CambiarSpritesheet(...) y
+	AplicarSombra(...), en el primero buscamos la ruta del graphic con el id que
+	trae el character, si no existe o el sprite no tiene frames lo ocultamos, si
+	existe duplicamos los SpriteFrames para no tocar los de la escena, recorremos
+	cada animacion y cada frame y si es un AtlasTexture le cambiamos el atlas por
+	la textura nueva, al final se lo volvemos a asignar al AnimatedSprite2D, en el
+	editor se limpia el sprite_frames y se vuelve a poner para que el cambio se vea
+	en la vista de la escena sin correr el juego, fuera del editor guardamos esos
+	frames en CacheFrames para no repetir el mismo trabajo, AplicarSombra hace lo
+	mismo pero más simple, busca la ruta de la sombra y se la pone al Sprite2D, si
+	no hay ruta la oculta, la sombra no es un caso aparte, entra por el mismo
+	AplicarGraficos.
+
+Entity:
+	es la base de la que salen el Player y luego el Npc, aqui vive lo que ambos
+	van a necesitar para no copiar el mismo codigo, tiene el CharacterGame y los
+	tres controladores, en _ready y cuando el character cambia llama a
+	ActualizarGraficos(), ese método no sabe de ids ni de rutas, solo le pide al
+	GraphicsController que aplique sprite y sombra con el character, el CharacterGame
+	es @tool y en los setters de charGraphic y charShadowGraphic hace emit_changed()
+	para que la Entity se entere tambien en el editor, ademas en _process, solo si
+	estamos en el editor, comparamos una version armada con los dos ids y si cambio
+	volvemos a actualizar, el Player ya no hace nada de esto, el solo lee el input
+	en el physic_process, llama a AplicarMovimiento y luego a AplicarAnimacion.
