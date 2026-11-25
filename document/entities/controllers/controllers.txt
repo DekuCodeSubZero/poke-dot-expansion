@@ -1,0 +1,26 @@
+Movemente Controller:
+	es un script dirigido a solo calculo del movimiento de una entidad con solo
+	un método del tipo función que retorna un valor para la posición de la entidad
+	recibe argumentos de la entidad, su tipo de entidad (PlayerData o NpcData), la
+	dirección, si esta corriendo y el delta, esto es importante trabajarlo desde el
+	physic_process ya que ahi tenemos a delta ya que a diferencia del process que se
+	ejecuta cada frame, este se ejecuta a un ritmo fijo y constante, dentro del método tipo
+	función AplicarMovimiento(...) tenemos la verificacion de si la direccion es
+	diferente a Vector2.ZERO que no hace saber si hay un cambio de dirección, luego
+	se hacen los calculos en base a los datos heredados del character y el delta junto
+	a un dato global TileSize, con esto efectuamos el calculo y luego nos aseguramos de
+	que la nueva posicion sea igual a targetdireccion que seria el destino exacto para efectuar
+	el movimiento por casillas, esto se devuelve al script que solicito el calculo.
+
+Anim Controller:
+	es un script dirigido a orquestar las animaciones de la entidad, contiende dos
+	métodos, uno del tipo procedimiento y el otro del tipo función, el importante
+	es el primero que se usa para determinar la animacion, el segundo es más un auxiliar
+	para el primero con el cual checamos la direccion y en base a eso le regresa
+	al método protagonista un dato string con el cual trabajaremos, el método principal
+	recibe de quien es la animacion que en este caso es AnimatedSprite2D,  la dirección,
+	si se mueve, esta corriendo o es primer paso, este ultimo es importante para la animación
+	natural al caminar o correr ya que alternaremos entre primer paso y segundo para mayor
+	naturalidad, esto es gracias a que en MovementController.AplicarMovimiento hay una especie
+	de bucle donde el EsPrimerPaso se niega en cada paso y este mismo se lo enviamos a
+	AplicarAnimmacion.
