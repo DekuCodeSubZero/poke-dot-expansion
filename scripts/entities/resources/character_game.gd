@@ -11,13 +11,11 @@ extends Resource
 			return
 		charGraphic = value
 		emit_changed()
-
 @export var charShadowGraphic: ObjEvents.owShadowID = ObjEvents.owShadowID.NONE:
 	set(value):
 		if charShadowGraphic == value:
 			return
 		charShadowGraphic = value
 		emit_changed()
-
 @export var walkSpeed: float = 3.0
 @export var runSpeed: float = 6.0
