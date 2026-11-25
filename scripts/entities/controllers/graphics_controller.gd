@@ -33,7 +33,11 @@ func CambiarSpritesheet(Animacion: AnimatedSprite2D, GraphicID: ObjEvents.owID) 
 		for i in range(nuevos_frames.get_frame_count(anim_name)):
 			var tex = nuevos_frames.get_frame_texture(anim_name, i)
 			if tex is AtlasTexture:
-				tex.atlas = nueva_textura
+				var nuevo_atlas := (tex as AtlasTexture).duplicate() as AtlasTexture
+				nuevo_atlas.atlas = nueva_textura
+				nuevos_frames.set_frame(anim_name, i, nuevo_atlas, nuevos_frames.get_frame_duration(anim_name, i))
 	if not Engine.is_editor_hint():
 		_cache_frames[GraphicID] = nuevos_frames
 	Animacion.sprite_frames = nuevos_frames
+	if Engine.is_editor_hint():
+		Animacion.queue_redraw()

@@ -4,12 +4,13 @@ extends Node2D
 
 @export var character: CharacterGame:
 	set(value):
-		if character != null and character.changed.is_connected(_actualizar_vista_editor):
-			character.changed.disconnect(_actualizar_vista_editor)
+		if character and character.changed.is_connected(_on_character_changed):
+			character.changed.disconnect(_on_character_changed)
 		character = value
-		if character != null and not character.changed.is_connected(_actualizar_vista_editor):
-			character.changed.connect(_actualizar_vista_editor)
-		_actualizar_vista_editor()
+		if character:
+			if not character.changed.is_connected(_on_character_changed):
+				character.changed.connect(_on_character_changed)
+		_actualizar_graficos()
 
 @export_group("Controladores")
 @export var movementController: MovementController
@@ -22,14 +23,21 @@ extends Node2D
 var EstaCorriendo: bool = false
 
 func _ready() -> void:
-	if character != null:
-		graphicsController.AplicarGraficos(AnimacionChar, ShadowSprite, character.charGraphic, character.charShadowGraphic)
+	if character and not character.changed.is_connected(_on_character_changed):
+		character.changed.connect(_on_character_changed)
+	_actualizar_graficos()
 
-func _actualizar_vista_editor() -> void:
-	if not is_node_ready():
+func _on_character_changed() -> void:
+	_actualizar_graficos()
+
+func _actualizar_graficos() -> void:
+	if not is_inside_tree():
 		return
-	if character != null and graphicsController != null:
-		graphicsController.AplicarGraficos(AnimacionChar, ShadowSprite, character.charGraphic, character.charShadowGraphic)
+	if character == null or graphicsController == null:
+		return
+	if AnimacionChar == null:
+		return
+	graphicsController.AplicarGraficos(AnimacionChar, ShadowSprite, character.charGraphic, character.charShadowGraphic)
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint():
