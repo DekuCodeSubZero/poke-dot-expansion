@@ -10,31 +10,23 @@ extends Node2D
 		if character != null and not character.changed.is_connected(_actualizar_vista_editor):
 			character.changed.connect(_actualizar_vista_editor)
 		_actualizar_vista_editor()
+
 @export_group("Controladores")
-@export var movementController: MovementController:
-	set(value):
-		movementController = value
-		_actualizar_vista_editor()
-@export var animController: AnimController:
-	set(value):
-		animController = value
-		_actualizar_vista_editor()
-@export var graphicsController: GraphicsController:
-	set(value):
-		graphicsController = value
-		_actualizar_vista_editor()
+@export var movementController: MovementController
+@export var animController: AnimController
+@export var graphicsController: GraphicsController
+
 @onready var AnimacionChar: AnimatedSprite2D = $Sprite
-@onready var ShadowSprite: Sprite2D = $Shadow
+@onready var ShadowSprite: Sprite2D = $Sprite/Shadow
 
 var EstaCorriendo: bool = false
 
 func _ready() -> void:
-	if character != null and not character.changed.is_connected(_actualizar_vista_editor):
-		character.changed.connect(_actualizar_vista_editor)
-	_actualizar_vista_editor()
+	if character != null:
+		graphicsController.AplicarGraficos(AnimacionChar, ShadowSprite, character.charGraphic, character.charShadowGraphic)
 
 func _actualizar_vista_editor() -> void:
-	if not is_inside_tree() or not is_node_ready():
+	if not is_node_ready():
 		return
 	if character != null and graphicsController != null:
 		graphicsController.AplicarGraficos(AnimacionChar, ShadowSprite, character.charGraphic, character.charShadowGraphic)
