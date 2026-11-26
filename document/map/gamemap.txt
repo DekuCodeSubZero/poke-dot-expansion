@@ -1,0 +1,19 @@
+GameMap:
+	Se encarga de dar identidad a una escena, convirtiéndola de una escena genérica
+	en un mapa jugable. Hace uso del recurso MapAttributes para definir sus propiedades
+	editables y ejecuta herramientas visuales exclusivas del editor (Engine.is_editor_hint()).
+
+	En primer lugar, escucha los cambios de MapAttributes mediante su señal "changed"
+	(conectada a CambioEnAtributos) y usa _draw() para dibujar el contorno exterior del
+	mapa según mapSize y Globals.TILE_SIZE, actualizándose únicamente cuando cambian
+	los datos en el Inspector.
+
+	En segundo lugar, vigila en _process() los nodos TileMapLayer ubicados dentro del
+	contenedor hijo "TileSet". Si detecta que el área pintada (get_used_rect) sobresale
+	del límite del mapa, ejecuta _limpiar_todos_los_tiles() como método orquestador y
+	_limpiar_capa() como función auxiliar para borrar al instante con erase_cell()
+	cualquier celda fuera de rango.
+
+	Por último, dentro del mismo _draw() traza una cuadrícula interna de 16x16 píxeles
+	(Globals.TILE_SIZE) usando dos bucles "for" independientes para columnas y filas,
+	evitando el costo de un bucle anidado y facilitando el diseño de niveles en el editor.
