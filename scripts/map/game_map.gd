@@ -9,53 +9,96 @@ extends Node2D
 		mapAttributes = valor
 		if is_instance_valid(mapAttributes) and not mapAttributes.changed.is_connected(CambioEnAtributos):
 			mapAttributes.changed.connect(CambioEnAtributos)
-		_limpiar_todos_los_tiles()
-		queue_redraw()
+		CambioEnAtributos()
+
+## Borra las celdas pintadas fuera de mapSize. Es DESTRUCTIVO y no se puede deshacer
+## con Ctrl+Z, por eso solo se ejecuta cuando pulsas este botón.
+@export_tool_button("Limpiar tiles fuera del mapa", "Clear")
+var BotonLimpiar: Callable = _limpiar_todos_los_tiles
+
+## Firma del estado anterior (mapSize + área usada de cada capa) para saber si algo cambió.
+var _UltimaFirma: int = 0
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
-		if is_instance_valid(mapAttributes) and not mapAttributes.changed.is_connected(CambioEnAtributos):
-			mapAttributes.changed.connect(CambioEnAtributos)
-		_limpiar_todos_los_tiles()
-		queue_redraw()
+		CambioEnAtributos()
 
 func _process(_delta: float) -> void:
 	if not Engine.is_editor_hint() or mapAttributes == null:
 		return
-	if mapAttributes.mapSize.x <= 0 or mapAttributes.mapSize.y <= 0:
+	# Solo reaccionamos si cambió algo; no se redibuja ni se recalcula cada frame.
+	var Firma: int = _calcular_firma()
+	if Firma == _UltimaFirma:
 		return
-	var contenedor:Node = get_node_or_null("TileSet")
-	if contenedor == null:
-		return
-	var limite:Rect2i = Rect2i(Vector2i.ZERO, mapAttributes.mapSize)
-	for hijo: TileMapLayer in contenedor.get_children():
-		if hijo is TileMapLayer:
-			var usado: Rect2i = hijo.get_used_rect()
-			if usado.has_area() and not limite.encloses(usado):
-				_limpiar_capa(hijo, limite)
+	_UltimaFirma = Firma
+	update_configuration_warnings()
+
+# --- Utilidades -------------------------------------------------------------
+
+func _mapa_valido() -> bool:
+	return mapAttributes != null and mapAttributes.mapSize.x > 0 and mapAttributes.mapSize.y > 0
+
+func _obtener_limite() -> Rect2i:
+	return Rect2i(Vector2i.ZERO, mapAttributes.mapSize)
+
+## Devuelve solo los hijos que realmente son TileMapLayer (ignora cualquier otro nodo).
+func _obtener_capas() -> Array[TileMapLayer]:
+	var Capas: Array[TileMapLayer] = []
+	var Contenedor: Node = get_node_or_null("TileSet")
+	if Contenedor == null:
+		return Capas
+	for Hijo in Contenedor.get_children():
+		if Hijo is TileMapLayer:
+			Capas.append(Hijo as TileMapLayer)
+	return Capas
+
+func _calcular_firma() -> int:
+	var Firma: int = hash(mapAttributes.mapSize)
+	for Capa in _obtener_capas():
+		Firma = Firma * 31 + hash(Capa.get_used_rect())
+	return Firma
+
+# --- Limpieza (solo bajo demanda) ------------------------------------------
 
 func _limpiar_todos_los_tiles() -> void:
-	if not Engine.is_editor_hint() or mapAttributes == null:
+	if not Engine.is_editor_hint() or not _mapa_valido():
 		return
-	if mapAttributes.mapSize.x <= 0 or mapAttributes.mapSize.y <= 0:
-		return
-	var contenedor:Node = get_node_or_null("TileSet")
-	if contenedor == null:
-		return
-	var limite: Rect2i = Rect2i(Vector2i.ZERO, mapAttributes.mapSize)
-	for hijo: TileMapLayer in contenedor.get_children():
-		if hijo is TileMapLayer:
-			_limpiar_capa(hijo, limite)
+	var Limite: Rect2i = _obtener_limite()
+	var Borradas: int = 0
+	for Capa in _obtener_capas():
+		Borradas += _limpiar_capa(Capa, Limite)
+	print("GameMap: se borraron %d celdas fuera del mapa." % Borradas)
+	update_configuration_warnings()
 
-func _limpiar_capa(capa: TileMapLayer, limite: Rect2i) -> void:
-	for celda: Vector2i in capa.get_used_cells():
-		if not limite.has_point(celda):
-			capa.erase_cell(celda)
+func _limpiar_capa(capa: TileMapLayer, limite: Rect2i) -> int:
+	var Borradas: int = 0
+	for Celda: Vector2i in capa.get_used_cells():
+		if not limite.has_point(Celda):
+			capa.erase_cell(Celda)
+			Borradas += 1
+	return Borradas
+
+# --- Avisos en el editor (triángulo amarillo en el árbol de escena) ---------
+
+func _get_configuration_warnings() -> PackedStringArray:
+	var Avisos: PackedStringArray = PackedStringArray()
+	if mapAttributes == null:
+		Avisos.append("Falta asignar un MapAttributes.")
+		return Avisos
+	if not _mapa_valido():
+		Avisos.append("mapSize debe ser mayor que cero en X e Y.")
+		return Avisos
+	var Limite: Rect2i = _obtener_limite()
+	for Capa in _obtener_capas():
+		var Usado: Rect2i = Capa.get_used_rect()
+		if Usado.has_area() and not Limite.encloses(Usado):
+			Avisos.append("%s tiene celdas fuera del mapa. Usa el botón 'Limpiar tiles fuera del mapa' si quieres borrarlas." % Capa.name)
+	return Avisos
+
+# --- Dibujo -----------------------------------------------------------------
 
 func _draw() -> void:
-	if not Engine.is_editor_hint() or mapAttributes == null:
-		return
-	if mapAttributes.mapSize.x <= 0 or mapAttributes.mapSize.y <= 0:
+	if not Engine.is_editor_hint() or not _mapa_valido():
 		return
 	var TamanoPixeles: Vector2 = Vector2(mapAttributes.mapSize) * Globals.TILE_SIZE
 	var ColorCuadricula: Color = Color(1.0, 1.0, 1.0, 0.15)
@@ -69,5 +112,6 @@ func _draw() -> void:
 	draw_rect(Rect, Color.LIGHT_GREEN, false, 2.0)
 
 func CambioEnAtributos() -> void:
-	_limpiar_todos_los_tiles()
+	_UltimaFirma = 0 # fuerza a _process a recalcular avisos en el siguiente frame
 	queue_redraw()
+	update_configuration_warnings()

@@ -1,0 +1,20 @@
+MapAttributes:
+	es el recurso con las propiedades editables de un mapa, es @tool y es el que
+	usa GameMap. Tiene mapName, mapID (MapSection.mapID), mapRegionID
+	(MapSection.mapRegionID) y mapSize (Vector2i en casillas, no en píxeles),
+	este último hace emit_changed() en su setter y es lo que provoca que GameMap
+	redibuje el contorno y la cuadrícula. Hay un grupo de campos String marcados
+	con "para más adelante" que todavía no hacen nada: mapScripts,
+	mapConnection, mapMusic, mapWeather, mapBattleType y mapWildEncounter. Y las
+	banderas bool, todas en false por defecto: showLocationName, isIndoor,
+	allowDigEscapeRope, allowFly y requiresFlash.
+
+MapSection:
+	es un RefCounted que solo agrupa identificadores, no se instancia. Tiene el
+	enum mapID (MAPSEC_NONE, MAPSEC_PRADO_NATAL, MAPSEC_PUEBLO_ALBA), el enum
+	mapRegionID (REGION_NONE, REGION_VALTHERION) y la constante mapScene, un
+	Dictionary que más adelante relacionará cada mapID con la ruta de su escena
+	y que por ahora solo tiene la entrada vacía de MAPSEC_NONE. Pendiente: como
+	mapID también se guarda como entero dentro de MapAttributes, conviene darle
+	valores explícitos y seguir la misma regla de ObjEvents (nunca insertar en
+	medio, siempre agregar al final).

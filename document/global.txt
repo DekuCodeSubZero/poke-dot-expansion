@@ -1,0 +1,18 @@
+Globals:
+	es una clase con class_name que solo guarda constantes compartidas, no es un
+	autoload, se usa directamente como Globals.TILE_SIZE. Por ahora tiene una
+	sola, TILE_SIZE = 16, el tamaño en píxeles de una casilla, de la que
+	dependen el movimiento por casillas, la cuadrícula y el límite del mapa.
+
+Pantalla:
+	el viewport es de 480x320 (240x160 de la GBA al doble), con stretch mode
+	viewport, filtro de texturas nearest para que el pixel art no se suavice y
+	el renderer GL Compatibility.
+
+Input:
+	las acciones usan los nombres de los botones de la GBA y están definidas en
+	el Input Map del proyecto, con teclas físicas: buttonUp, buttonDown,
+	buttonLeft y buttonRight con las flechas, buttonA con Z, buttonB con X,
+	buttonL con A, buttonR con S, buttonSelect con Backspace y buttonStart con
+	Enter. Por ahora el código solo usa las flechas (para moverse) y buttonB
+	(para correr), el resto está definido para más adelante.

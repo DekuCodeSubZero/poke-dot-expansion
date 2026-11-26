@@ -41,7 +41,24 @@ func AlCambiarCharacter() -> void:
 func ActualizarGraficos() -> void:
 	if not is_inside_tree():
 		return
+	# Refresca el triángulo amarillo del árbol de escena (solo hace algo en el editor).
+	update_configuration_warnings()
 	if character == null or graphicsController == null or AnimacionChar == null:
 		return
 	UltimaVersionGrafica = int(character.charGraphic) * 1000 + int(character.charShadowGraphic)
 	graphicsController.AplicarGraficos(AnimacionChar, SombraChar, character)
+
+## Avisos visibles en el editor: reemplazan al printerr que se repetía 60 veces por segundo.
+func _get_configuration_warnings() -> PackedStringArray:
+	var Avisos: PackedStringArray = PackedStringArray()
+	if character == null:
+		Avisos.append("Falta asignar un CharacterGame en 'character'.")
+	elif not ObjEvents.TieneGrafico(character.charGraphic):
+		Avisos.append("charGraphic no tiene ruta en ObjEvents.owGraphics; el sprite se ocultará.")
+	if movementController == null:
+		Avisos.append("Falta asignar movementController.")
+	if animController == null:
+		Avisos.append("Falta asignar animController.")
+	if graphicsController == null:
+		Avisos.append("Falta asignar graphicsController.")
+	return Avisos

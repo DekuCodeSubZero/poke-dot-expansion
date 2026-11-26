@@ -6,6 +6,7 @@
 
 [sub_resource type="Resource" id="Resource_dslrl"]
 script = ExtResource("2_2g7oh")
+mapSize = Vector2i(30, 20)
 metadata/_custom_type_script = "uid://dk5kmdwp2s1ox"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_5w1yu"]
@@ -524,6 +525,6 @@ tile_set = SubResource("TileSet_htemk")
 
 [node name="Behaviour" type="Node2D" parent="." unique_id=488022988]
 
-[node name="EventObj" type="Node2D" parent="." unique_id=786117529]
-
 [node name="Trigger" type="Node2D" parent="." unique_id=45998574]
+
+[node name="EventObj" type="Node2D" parent="." unique_id=786117529]

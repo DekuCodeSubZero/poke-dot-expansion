@@ -1,0 +1,43 @@
+CharacterGame:
+	es el recurso con los datos de cualquier personaje del juego, es @tool para
+	que los cambios se vean en el editor. Tiene charID (todavía sin uso),
+	charName, charGraphic (ObjEvents.owID), charShadowGraphic
+	(ObjEvents.owShadowID), walkSpeed (3.0) y runSpeed (6.0), las velocidades
+	están en casillas por segundo y MovementController las multiplica por
+	Globals.TILE_SIZE. Los setters de charGraphic y charShadowGraphic solo hacen
+	emit_changed() si el valor realmente es distinto, de ahí se entera la Entity
+	para actualizar los graficos.
+
+PlayerData:
+	hereda de CharacterGame y le agrega lo propio del jugador: party (Array) y
+	bag (Dictionary), por ahora sin tipar porque todavía no existe la clase del
+	Pokémon ni la del objeto. Cuando existan conviene tiparlos.
+
+ObjEvents:
+	es un recurso @tool que solo sirve de catálogo, contiene dos enums y dos
+	diccionarios. owID lista los graficos de personaje (OBJ_NONE,
+	OBJ_KAEL_NORMAL, OBJ_KAEL_RUN, OBJ_KAIDA_NORMAL, OBJ_KAIDA_RUN) y owShadowID
+	los tamaños de sombra (NONE, S, M, L, XL). owGraphics y owShadowGraphics
+	relacionan cada id con la ruta del png, OBJ_NONE y NONE llevan un string
+	vacío a propósito (significa sin grafico), y OBJ_KAEL_RUN y OBJ_KAIDA_RUN
+	todavía no están en owGraphics porque aún no existen sus png, mientras tanto
+	el GraphicsController avisa con un push_warning. Los métodos
+	TieneGrafico(...) y TieneSombra(...) responden si un id tiene entrada en su
+	diccionario, y los usan el GraphicsController y los avisos de Entity.
+	Regla importante: los enums se guardan como números enteros dentro de los
+	.tscn y .tres (por ejemplo charGraphic = 1 en player.tscn), por eso cada id
+	tiene un valor explícito y nunca se cambia el valor de uno existente ni se
+	inserta uno en medio, siempre se agrega al final con el siguiente número, si
+	no, los datos ya guardados cambian de significado sin ningun error.
+
+Como agregar un personaje:
+	1) poner el spritesheet en graphics/obj_event/<nombre>/normal.png. Cada
+	frame es de 32x32 y la distribución debe ser la misma que la de kael, porque
+	solo se cambia la textura del atlas y no las regiones: tres columnas (x = 0,
+	32, 64) y una fila por dirección (y = 0 abajo, 32 arriba, 64 izquierda, 96
+	derecha), el idle es la columna del medio, el primer paso usa la columna 0 y
+	luego la del medio, y el segundo paso usa la columna 2 y luego la del medio.
+	2) agregar el id al final del enum owID con el siguiente número. 3) agregar
+	el id y su ruta en owGraphics. 4) asignar el id en charGraphic del
+	CharacterGame de la entidad desde el Inspector, el cambio se ve en el editor
+	al instante.

@@ -1,58 +1,109 @@
-Movemente Controller:
-	es un script dirigido a solo calculo del movimiento de una entidad con solo
-	un método del tipo función que retorna un valor para la posición de la entidad
-	recibe argumentos de la entidad, su tipo de entidad (CharacterGame, ya sea
-	PlayerData o NpcData), la dirección, si esta corriendo y el delta, esto es
-	importante trabajarlo desde el physic_process ya que ahi tenemos a delta ya que
-	a diferencia del process que se ejecuta cada frame, este se ejecuta a un ritmo
-	fijo y constante, dentro del método tipo función AplicarMovimiento(...) tenemos
-	la verificacion de si la direccion es diferente a Vector2.ZERO que nos hace
-	saber si hay un cambio de dirección, luego se hacen los calculos en base a los
-	datos heredados del character y el delta junto a un dato global TileSize, con
-	esto efectuamos el calculo y luego nos aseguramos de que la nueva posicion sea
-	igual a TargetDireccion que seria el destino exacto para efectuar el movimiento
-	por casillas, esto se devuelve al script que solicito el calculo.
+Movement Controller:
+	es un script dirigido a solo calculo del movimiento de una entidad, tiene un
+	único método tipo función, AplicarMovimiento(...), que devuelve la nueva
+	posición de la entidad pero no la aplica por su cuenta, eso lo hace quien lo
+	llamó. Recibe el nodo que se mueve, su CharacterGame (hoy PlayerData, más
+	adelante también el de los NPC), la dirección, si esta corriendo y el delta,
+	esto es importante trabajarlo desde el physics_process ya que ahí tenemos a
+	delta a un ritmo fijo y constante, a diferencia del process que se ejecuta
+	cada frame. El controlador guarda su propio estado: SeMueve, TargetPosicion
+	(el destino exacto en píxeles del paso actual), DireccionActual y
+	EsPrimerPaso. Con la velocidad del character (que está en casillas por
+	segundo) y el dato global Globals.TILE_SIZE calculamos un presupuesto de
+	píxeles para este tick, y luego el método trabaja en dos partes y en este
+	orden. Primero, si hay un paso en curso avanzamos con move_toward hacia
+	TargetPosicion, si llegamos nos quedamos exactamente en TargetPosicion,
+	SeMueve pasa a false y lo que sobró del presupuesto se conserva. Segundo, si
+	ya no hay un paso en curso y la dirección es diferente a Vector2.ZERO,
+	iniciamos un paso nuevo, guardamos DireccionActual, calculamos el nuevo
+	TargetPosicion con la posición actual más una casilla, ponemos SeMueve en
+	true, negamos EsPrimerPaso (no es un bucle, es un toggle que se hace al
+	iniciar cada paso para alternar entre primer y segundo paso) y movemos lo
+	que sobró del presupuesto. El orden importa: como el paso nuevo empieza en
+	el mismo tick en que termina el anterior, SeMueve nunca queda en false entre
+	casilla y casilla mientras se mantenga la tecla, y así el AnimController no
+	recibe un frame de idle (parpadeo) entre pasos. Además cada paso parte de la
+	posición exacta del anterior, por lo que no se acumula error y la entidad
+	sigue alineada a la cuadrícula siempre que haya empezado alineada. Todavía
+	no revisa colisiones ni gira en el sitio antes de caminar.
 
 Anim Controller:
-	es un script dirigido a orquestar las animaciones de la entidad, contiene dos
-	métodos, uno del tipo procedimiento y el otro del tipo función, el importante
-	es el primero que se usa para determinar la animacion, el segundo es más un
-	auxiliar para el primero con el cual checamos la direccion y en base a eso le
-	regresa al método protagonista un dato string con el cual trabajaremos, el
-	método principal recibe de quien es la animacion que en este caso es
-	AnimatedSprite2D, la dirección, si se mueve, esta corriendo o es primer paso,
-	este ultimo es importante para la animación natural al caminar o correr ya que
-	alternaremos entre primer paso y segundo para mayor naturalidad, esto es
-	gracias a que en MovementController.AplicarMovimiento hay una especie de bucle
-	donde el EsPrimerPaso se niega en cada paso y este mismo se lo enviamos a
-	AplicarAnimacion.
+	es un script dirigido a orquestar las animaciones de la entidad, contiene
+	dos métodos, uno del tipo procedimiento y el otro del tipo función, el
+	importante es AplicarAnimacion(...), que recibe de quien es la animacion que
+	en este caso es AnimatedSprite2D, la dirección, si se mueve, si esta
+	corriendo y si es primer paso. El nombre de la animación se arma como Estado
+	+ "_" + sufijo de dirección, donde Estado es "idle" si no se mueve, o
+	"first_step" / "second_step" según EsPrimerPaso (este valor viene del toggle
+	de MovementController.AplicarMovimiento y alternar entre uno y otro es lo
+	que da la naturalidad al caminar), y el sufijo lo da el método auxiliar
+	ObtenerNombre(...), que regresa un string con up, down o left según la
+	dirección y right para cualquier otra. Solo mandamos play cuando la
+	animación pedida es distinta a la actual, para no reiniciarla en cada tick.
+	Los nombres armados tienen que existir en el SpriteFrames de la entidad (por
+	ejemplo first_step_down, idle_left o second_step_up). El argumento
+	EstaCorriendo ya se recibe pero todavía no se usa, esta reservado para
+	cuando existan las animaciones de correr (OBJ_KAEL_RUN y OBJ_KAIDA_RUN).
 
 Graphics Controller:
-	es un script dirigido a cambiar los graficos de la entidad, tanto el spritesheet
-	del personaje como su sombra, no calcula movimiento ni elige la animacion, solo
-	aplica lo que ya trae el CharacterGame, el método protagonista es
-	AplicarGraficos(...) y este recibe el AnimatedSprite2D, el Sprite2D de la sombra
-	y el CharacterGame, de ahi se reparte en dos, CambiarSpritesheet(...) y
-	AplicarSombra(...), en el primero buscamos la ruta del graphic con el id que
-	trae el character, si no existe o el sprite no tiene frames lo ocultamos, si
-	existe duplicamos los SpriteFrames para no tocar los de la escena, recorremos
-	cada animacion y cada frame y si es un AtlasTexture le cambiamos el atlas por
-	la textura nueva, al final se lo volvemos a asignar al AnimatedSprite2D, en el
-	editor se limpia el sprite_frames y se vuelve a poner para que el cambio se vea
-	en la vista de la escena sin correr el juego, fuera del editor guardamos esos
-	frames en CacheFrames para no repetir el mismo trabajo, AplicarSombra hace lo
-	mismo pero más simple, busca la ruta de la sombra y se la pone al Sprite2D, si
-	no hay ruta la oculta, la sombra no es un caso aparte, entra por el mismo
-	AplicarGraficos.
+	es un script dirigido a cambiar los graficos de la entidad, tanto el
+	spritesheet del personaje como su sombra, no calcula movimiento ni elige la
+	animacion, solo aplica lo que ya trae el CharacterGame, el método
+	protagonista es AplicarGraficos(...) y este recibe el AnimatedSprite2D, el
+	Sprite2D de la sombra y el CharacterGame, de ahi se reparte en dos,
+	CambiarSpritesheet(...) y AplicarSombra(...). En el primero buscamos el id
+	del character en ObjEvents.owGraphics y se pueden dar tres casos: si el id
+	no tiene ninguna entrada en el diccionario (por ejemplo un id nuevo al que
+	todavía no le pusimos ruta) se manda un push_warning y se oculta el sprite,
+	si la ruta es un string vacío (OBJ_NONE) o el archivo no existe o el sprite
+	no tiene frames se oculta sin avisar, y si todo está bien lo mostramos y
+	seguimos. Duplicamos los SpriteFrames (duplicate(true)) para no tocar los de
+	la escena, recorremos cada animacion y cada frame y si es un AtlasTexture le
+	cambiamos el atlas por la textura nueva, lo que implica que todas las
+	entidades comparten la misma distribución de frames dentro del spritesheet.
+	Al final guardamos la animación y el frame actuales, limpiamos el
+	sprite_frames y se lo volvemos a asignar al AnimatedSprite2D con la
+	animación y el frame que tenía, y con queue_redraw se ve el cambio en la
+	vista de la escena sin correr el juego. Fuera del editor guardamos esos
+	frames en CacheFrames (un Dictionary static con el id como llave) para no
+	repetir el mismo trabajo, en el editor nunca se usa el cache para que cada
+	cambio en el Inspector se vea. AplicarSombra hace lo mismo pero más simple,
+	busca la ruta en ObjEvents.owShadowGraphics y se la pone al Sprite2D, si no
+	hay ruta o el archivo no existe le quita la textura y la oculta, la sombra
+	no es un caso aparte, entra por el mismo AplicarGraficos.
 
 Entity:
 	es la base de la que salen el Player y luego el Npc, aqui vive lo que ambos
 	van a necesitar para no copiar el mismo codigo, tiene el CharacterGame y los
-	tres controladores, en _ready y cuando el character cambia llama a
-	ActualizarGraficos(), ese método no sabe de ids ni de rutas, solo le pide al
-	GraphicsController que aplique sprite y sombra con el character, el CharacterGame
-	es @tool y en los setters de charGraphic y charShadowGraphic hace emit_changed()
-	para que la Entity se entere tambien en el editor, ademas en _process, solo si
-	estamos en el editor, comparamos una version armada con los dos ids y si cambio
-	volvemos a actualizar, el Player ya no hace nada de esto, el solo lee el input
-	en el physic_process, llama a AplicarMovimiento y luego a AplicarAnimacion.
+	tres controladores como exports, y dos referencias con @onready:
+	AnimacionChar ($Sprite) y SombraChar ($Sprite/Shadow), por eso toda escena
+	de entidad debe tener esos nodos con esos nombres. El setter de character
+	desconecta la señal changed del anterior, conecta la del nuevo y llama a
+	ActualizarGraficos(), de modo que en _ready y cada vez que el character
+	cambia se llama a ese método, que no sabe de ids ni de rutas, solo le pide
+	al GraphicsController que aplique sprite y sombra con el character. Antes de
+	eso comprueba que el nodo este dentro del árbol, refresca los avisos de
+	configuración con update_configuration_warnings() y sale si falta el
+	character, el graphicsController o el sprite. El CharacterGame es @tool y en
+	los setters de charGraphic y charShadowGraphic hace emit_changed() para que
+	la Entity se entere tambien en el editor, ademas en _process, solo si
+	estamos en el editor, comparamos una version armada con los dos ids
+	(charGraphic * 1000 + charShadowGraphic) y si cambio volvemos a actualizar.
+	Con _get_configuration_warnings() el editor muestra el triángulo amarillo en
+	el árbol de escena cuando falta asignar el character, cuando el charGraphic
+	no tiene ruta en ObjEvents.owGraphics o cuando falta alguno de los tres
+	controladores, esto reemplaza al printerr que antes se repetía en cada
+	physics_process.
+
+Player:
+	hereda de Entity y es @tool para que la vista previa de los graficos siga
+	funcionando en el editor, aunque su propio código se corta en el editor con
+	Engine.is_editor_hint(). En _ready llama a super._ready() y, ya en juego, si
+	el character esta vacío manda un solo push_error. En el physics_process lee
+	el input con esta prioridad: abajo, izquierda, derecha y arriba (si hay
+	varias teclas gana la primera de la lista), EstaCorriendo es verdadero solo
+	si hay dirección y se mantiene buttonB, luego llama a
+	MovementController.AplicarMovimiento, se asigna el resultado a position y
+	por último llama a AnimController.AplicarAnimacion con el estado del
+	MovementController. El Player ya no hace nada más, no sabe de graficos ni de
+	calculos.
