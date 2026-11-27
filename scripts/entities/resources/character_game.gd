@@ -4,6 +4,7 @@ extends Resource
 
 @export var charID: int = 0
 @export var charName: String = ""
+@export var charMoney: float = 0.0
 
 @export var charGraphic: ObjEvents.owID = ObjEvents.owID.OBJ_NONE:
 	set(value):
@@ -19,3 +20,4 @@ extends Resource
 		emit_changed()
 @export var walkSpeed: float = 3.0
 @export var runSpeed: float = 6.0
+@export var charParty: Array

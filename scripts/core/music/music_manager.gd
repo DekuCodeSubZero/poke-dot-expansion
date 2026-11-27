@@ -1,5 +1,4 @@
 @tool
-class_name musicManager
 extends Node
 
 const SFX_POOL_SIZE: int = 4
@@ -34,12 +33,6 @@ func _ready() -> void:
 		Se.process_mode = Node.PROCESS_MODE_ALWAYS
 		add_child(Se)
 		SfxPlayers.append(Se)
-
-func _process(delta: float) -> void:
-	if Bgm.stream == null or rutaActual.is_empty():
-		return
-	if not Bgm.playing:
-		return
 
 func Reproducir(Ruta: String) -> void:
 	if Ruta.is_empty():
