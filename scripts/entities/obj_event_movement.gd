@@ -16,7 +16,7 @@ enum MovementTypeID {
 	PLAYER,
 	FACE_DOWN_AND_UP,
 	FACE_LEFT_AND_RIGHT,
-	MOVEMENT_TYPE_FACE_UP_AND_LEFT,
+	FACE_UP_AND_LEFT,
 	FACE_UP_AND_RIGHT,
 	FACE_DOWN_AND_LEFT,
 	FACE_DOWN_AND_RIGHT,
@@ -24,4 +24,22 @@ enum MovementTypeID {
 	FACE_DOWN_UP_AND_RIGHT,
 	FACE_UP_LEFT_AND_RIGHT,
 	FACE_DOWN_LEFT_AND_RIGHT,
+}
+
+const DIRECCIONES_PERMITIDAS: Dictionary = {
+	MovementTypeID.LOOK_AROUND: [Vector2.DOWN, Vector2.UP, Vector2.LEFT, Vector2.RIGHT],
+	MovementTypeID.FACE_UP: [Vector2.UP],
+	MovementTypeID.FACE_DOWN: [Vector2.DOWN],
+	MovementTypeID.FACE_LEFT: [Vector2.LEFT],
+	MovementTypeID.FACE_RIGHT: [Vector2.RIGHT],
+	MovementTypeID.FACE_DOWN_AND_UP: [Vector2.DOWN, Vector2.UP],
+	MovementTypeID.FACE_LEFT_AND_RIGHT: [Vector2.LEFT, Vector2.RIGHT],
+	MovementTypeID.FACE_UP_AND_LEFT: [Vector2.UP, Vector2.LEFT],
+	MovementTypeID.FACE_UP_AND_RIGHT: [Vector2.UP, Vector2.RIGHT],
+	MovementTypeID.FACE_DOWN_AND_LEFT: [Vector2.DOWN, Vector2.LEFT],
+	MovementTypeID.FACE_DOWN_AND_RIGHT: [Vector2.DOWN, Vector2.RIGHT],
+	MovementTypeID.FACE_DOWN_UP_AND_LEFT: [Vector2.DOWN, Vector2.UP, Vector2.LEFT],
+	MovementTypeID.FACE_DOWN_UP_AND_RIGHT: [Vector2.DOWN, Vector2.UP, Vector2.RIGHT],
+	MovementTypeID.FACE_UP_LEFT_AND_RIGHT: [Vector2.UP, Vector2.LEFT, Vector2.RIGHT],
+	MovementTypeID.FACE_DOWN_LEFT_AND_RIGHT: [Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT],
 }

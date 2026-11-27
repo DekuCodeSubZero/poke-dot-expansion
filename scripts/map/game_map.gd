@@ -21,6 +21,7 @@ const MARGEN_BORDE: int = 12
 var _UltimaFirma: int = 0
 
 func _ready() -> void:
+	AsegurarGrilla()
 	if Engine.is_editor_hint():
 		CambioEnAtributos()
 		return
@@ -136,21 +137,37 @@ func _get_configuration_warnings() -> PackedStringArray:
 
 # --- Dibujo -----------------------------------------------------------------
 
-func _draw() -> void:
-	if not Engine.is_editor_hint() or not _mapa_valido():
+func AsegurarGrilla() -> void:
+	if get_node_or_null("GrillaEditor") != null:
 		return
-	var TamanoPixeles: Vector2 = Vector2(mapAttributes.mapSize) * Globals.TILE_SIZE
-	var ColorCuadricula: Color = Color(1.0, 1.0, 1.0, 0.15)
-	for x in range(1, mapAttributes.mapSize.x):
-		var pos_x: float = x * Globals.TILE_SIZE
-		draw_line(Vector2(pos_x, 0), Vector2(pos_x, TamanoPixeles.y), ColorCuadricula, 1.0)
-	for y in range(1, mapAttributes.mapSize.y):
-		var pos_y: float = y * Globals.TILE_SIZE
-		draw_line(Vector2(0, pos_y), Vector2(TamanoPixeles.x, pos_y), ColorCuadricula, 1.0)
-	var Rect: Rect2 = Rect2(Vector2.ZERO, TamanoPixeles)
-	draw_rect(Rect, Color.LIGHT_GREEN, false, 2.0)
+	var Grilla: Node2D = GrillaEditor.new()
+	Grilla.name = "GrillaEditor"
+	Grilla.z_as_relative = false
+	Grilla.z_index = 100
+	add_child(Grilla)
 
 func CambioEnAtributos() -> void:
-	_UltimaFirma = 0 # fuerza a _process a recalcular avisos en el siguiente frame
-	queue_redraw()
+	_UltimaFirma = 0
+	var Grilla := get_node_or_null("GrillaEditor")
+	if Grilla != null:
+		Grilla.queue_redraw()
 	update_configuration_warnings()
+
+class GrillaEditor extends Node2D:
+	func _draw() -> void:
+		var Mapa:GameMap = get_parent() as GameMap
+		if Mapa == null or not Engine.is_editor_hint():
+			return
+		if Mapa.mapAttributes == null:
+			return
+		if Mapa.mapAttributes.mapSize.x <= 0 or Mapa.mapAttributes.mapSize.y <= 0:
+			return
+		var TamanoPixeles: Vector2 = Vector2(Mapa.mapAttributes.mapSize) * Globals.TILE_SIZE
+		var ColorCuadricula: Color = Color(1.0, 1.0, 1.0, 0.15)
+		for x in range(1, Mapa.mapAttributes.mapSize.x):
+			var pos_x: float = x * Globals.TILE_SIZE
+			draw_line(Vector2(pos_x, 0), Vector2(pos_x, TamanoPixeles.y), ColorCuadricula, 1.0)
+		for y in range(1, Mapa.mapAttributes.mapSize.y):
+			var pos_y: float = y * Globals.TILE_SIZE
+			draw_line(Vector2(0, pos_y), Vector2(TamanoPixeles.x, pos_y), ColorCuadricula, 1.0)
+		draw_rect(Rect2(Vector2.ZERO, TamanoPixeles), Color.LIGHT_GREEN, false, 1.0)

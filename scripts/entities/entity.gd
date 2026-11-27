@@ -24,6 +24,7 @@ var UltimaVersionGrafica: int = -1
 func _ready() -> void:
 	if character != null and not character.changed.is_connected(AlCambiarCharacter):
 		character.changed.connect(AlCambiarCharacter)
+	z_as_relative = true
 	ActualizarGraficos()
 
 func _process(_delta: float) -> void:
