@@ -1,0 +1,31 @@
+Enums de ids:
+	los ids de personajes, mapas y audio se escriben al estilo de pokeemerald,
+	con un prefijo y en mayúsculas: OBJ_ y owID para gráficos de personaje,
+	MAPSEC_ y REGION_ para mapas y regiones, BGM_, ME_ y SE_ para audio. Estos
+	enums se guardan como números enteros dentro de los .tscn y .tres, por eso
+	hay una sola regla para todos: nunca insertar un id en medio, nunca borrar
+	ni reordenar uno existente, siempre agregar al final con el siguiente
+	número, aunque quede fuera de su grupo temático. Si no, los datos ya
+	guardados cambian de significado sin ningún error. Hoy owID y owShadowID ya
+	tienen valores explícitos, y todavía no los tienen MapSection.mapID,
+	MapSection.mapRegionID ni los enums de MusicID.
+
+Nombres:
+	archivos y carpetas en snake_case (game_map.gd, prado_natal/). Las clases
+	con class_name en PascalCase (GameMap, MovementController, ObjEvents), la
+	excepción es musicManager, el class_name del autoload, que se escribe
+	distinto al autoload MusicManager. Los métodos y variables de la lógica del
+	juego van en PascalCase y en español (AplicarMovimiento, SeMueve,
+	CargarMapa), mientras que los campos de los recursos que se editan en el
+	Inspector van en camelCase y en inglés (charGraphic, mapSize, walkSpeed).
+	Las constantes van en MAYÚSCULAS_CON_GUION (TILE_SIZE, SFX_POOL_SIZE), salvo
+	los diccionarios que dependen de un enum, que llevan el estilo de este
+	(owGraphics, mapScene).
+
+Comentarios y documentación:
+	los campos que todavía no hacen nada se marcan con el comentario ## --para
+	más adelante--. Cada sistema que se termina se documenta en un .txt dentro
+	de document/, con el título y dos puntos, el texto en párrafo con una
+	sangría de tab, unas 76 columnas por línea y ortografía con acentos. Cuando
+	el código cambia hay que revisar su documento, y la lista de documentos está
+	en el README.

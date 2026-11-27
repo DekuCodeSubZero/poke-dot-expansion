@@ -1,20 +1,43 @@
 MusicManager:
-	Un autoload que accede a las herramientas de audio que busca y configura 2
-	buses, "Music" y "SFX", Music esta dirigido al grupo BGM y ME, mientras que
-	SFX va dirigido para los del grupo SE, esto se hizo con la finalidad de
-	separar Musica de efectos sonoros.
-	
-	hay un metodo para cada tipo de musica definido en MusicID y otro para los
-	efectos de sonido, pero los que son del tipo Music llaman Reproducir(...)
-	este recibe una ruta dada en string y la procesa para reproducirla, los del
-	tipo SFX tienen su propio metodo llamado ReproducirSeRuta(...) donde tambien
-	recibe una ruta y hace el proceso para la reproduccion del efecto de sonido,
-	por otro lado se usan metodos del tipo funcion que retornan datos para un
-	mejor manejo como lo es el metodo EstaSonando(...).
-	
-	tambien hay medidas para evitar que una musica se reinicie cuando suena un
-	efecto sonoro guardando la posicion en la que la musica se quedo y recuperandola
-	luego, finalmente existe un metodo para detener la musica usado para excepciones
-	y seguridad. Al ser un autoload sus metodos quedan listos para ser usados por
-	cualquiera que requiera de sus servicios como por ejemplo el mapa que llama al
-	metodo que necesita que en este caso es ReproducirMapa(...).
+	es un autoload (se registra en Project Settings con el nombre MusicManager,
+	por eso se llama desde cualquier lado sin instanciarlo) que se encarga de
+	todo el audio del juego. En _ready crea los reproductores que necesita: Bgm
+	(la música de fondo), Me (los efectos musicales o jingles) y un grupo de 4
+	reproductores para los efectos de sonido (SFX_POOL_SIZE). Los buses Music y
+	SFX no los crea él, están definidos en default_bus_layout.tres, y
+	ResolverBus(...) solo busca cada uno por su nombre, si no existe manda un
+	push_warning y usa Master para que el juego suene aunque falten. Bgm y Me
+	van al bus Music y los SE al bus SFX, esto se hizo con la finalidad de
+	separar música de efectos sonoros. El manager y sus reproductores usan
+	PROCESS_MODE_ALWAYS para que el audio siga aunque el árbol esté en pausa.
+
+	hay tres tipos de audio y cada uno entra por un camino diferente. BGM es la
+	música que se queda sonando (mapas y batallas), entra por
+	ReproducirMapa(...) y ReproducirBatalla(...), que le piden la ruta a MusicID
+	y llaman a Reproducir(Ruta). Reproducir no hace nada si esa misma ruta ya
+	está sonando (así entrar a otro mapa con la misma música no la reinicia), si
+	la ruta es un string vacío detiene la música con Detener(), y si el archivo
+	no existe manda un push_warning y deja lo que sonaba. ReproducirMapa además
+	detiene la música cuando el ID es BGM_NONE.
+
+	ME es el efecto musical, un jingle corto como recibir un objeto, entra por
+	ReproducirEfectoMusical(...) y usa su propio reproductor. Si había una BGM
+	sonando guarda la posición en la que iba (BgmPosicionGuardada), la detiene y
+	marca BgmPausadaPorMe, y cuando el ME termina su señal finished llama a
+	OnMeFinished(), que reanuda la BGM desde esa posición, de ahí que la música
+	no se reinicie después del jingle.
+
+	SE es el efecto de sonido, entra por ReproducirSe(ID), que busca la ruta en
+	MusicID y llama a ReproducirSeRuta(Ruta), este toma un reproductor libre con
+	SfxLibre() y lo reproduce, si no hay ruta o el archivo no existe no suena
+	nada. Los 4 reproductores permiten que suenen varios efectos a la vez y, si
+	los 4 están ocupados, se corta el primero para reproducir el nuevo.
+
+	también hay métodos del tipo función que retornan datos para un mejor
+	manejo: EstaSonando(), que dice si la BGM está sonando, y RutaActual(), que
+	regresa la ruta de la BGM actual. Detener() existe para excepciones y
+	seguridad, limpia el stream, la ruta y la marca de pausa por ME. Por ahora
+	solo GameMap lo usa, en su _ready con
+	ReproducirMapa(mapAttributes.mapMusic), los demás métodos ya están listos
+	para quien los necesite. Todavía no hay fundidos (fade) ni control de
+	volumen, volume_db se pone en 0.0 en cada reproducción.

@@ -66,7 +66,7 @@ func _calcular_firma() -> int:
 func GenerarBordeInfinito() -> void:
 	if not _mapa_valido():
 		return
-	var CapaBorde: Node = get_node_or_null("Behaviour/Borde") as TileMapLayer
+	var CapaBorde: TileMapLayer = get_node_or_null("Behaviour/Borde") as TileMapLayer
 	if CapaBorde == null:
 		return
 	CapaBorde.visible = false
@@ -89,7 +89,7 @@ func GenerarBordeInfinito() -> void:
 			if LimiteMapa.has_point(CeldaDestino):
 				continue
 			var PatronX: int = RectPatron.position.x + posmod(x, RectPatron.size.x)
-			var PatronY: int = RectPatron.position.y + posmod(x, RectPatron.size.y)
+			var PatronY: int = RectPatron.position.y + posmod(y, RectPatron.size.y)
 			var CeldaOrigen: Vector2i = Vector2i(PatronX, PatronY)
 			var SourceID: int = CapaBorde.get_cell_source_id(CeldaOrigen)
 			if SourceID != -1:

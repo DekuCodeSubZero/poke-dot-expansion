@@ -36,9 +36,29 @@ GameMap:
 	columnas y filas, evitando el costo de un bucle anidado y facilitando el
 	diseño de niveles en el editor.
 
+	Ya en juego (fuera del editor), _ready() reproduce la música del mapa con
+	MusicManager.ReproducirMapa(mapAttributes.mapMusic) y llama a
+	GenerarBordeInfinito(), que rellena con un patrón repetido todo lo que queda
+	fuera del mapa. El patrón se dibuja a mano en la capa Behaviour/Borde (hoy
+	un bloque de 2x2 casillas) y esa capa se oculta al iniciar, solo sirve de
+	molde. Se crea una capa nueva, BordeGenerado, con el mismo tile_set y
+	z_index, y se recorren todas las celdas desde -MARGEN_BORDE hasta el tamaño
+	del mapa más MARGEN_BORDE (12 casillas, suficiente porque con el zoom de 2
+	la cámara muestra 15x10 casillas, es decir, 7.5 y 5 hacia cada lado desde el
+	jugador). Las celdas dentro del mapa se saltan con has_point, y para las de
+	afuera se busca la celda equivalente del patrón con posmod(x, ancho) y
+	posmod(y, alto), cada eje con su propia coordenada, y se copian su source
+	id, sus atlas coords y su alternative. Como se usa posmod y no un simple
+	residuo, también funciona con coordenadas negativas, que es justo la zona de
+	afuera hacia arriba y hacia la izquierda. Si el patrón no tiene celdas
+	pintadas (get_used_rect sin área) no se genera nada, y el borde solo existe
+	mientras corre el juego, en el editor no se ve.
+
 	La escena base (map_base.tscn) tiene un nodo raíz Map con el script GameMap
 	y estos hijos: TileSet (un Node2D contenedor, no confundir con la clase
 	TileSet) con cinco TileMapLayer, Tile0, Tile1 y Tile2 quedan por debajo de
 	las entidades, Tile3 (z_index 10) y Tile4 (z_index 11) por encima de ellas
-	ya que el Player tiene z_index 2; y tres contenedores vacíos para más
-	adelante: Behaviour, EventObj y Trigger.
+	ya que el Player tiene z_index 2; Behaviour, con las capas Borde (el patrón
+	del borde) y Collision; y dos contenedores vacíos para más adelante:
+	EventObj y Trigger. Por ahora el Player se mete dentro de EventObj al cargar
+	el mapa.

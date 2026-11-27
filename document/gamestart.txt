@@ -1,8 +1,29 @@
 GameStart:
-	Encargado de Instanciar al jugador en un mapa usando de contenedor un node2D
-	como almacenamiento para la escena del mapa y el jugador es integrado al nodo
-	EventObj de la escena del mapa.
-	
-	todo es posible gracias al método del tipo procedimiento llamado "CargarMapa"
-	que recibe como argumento un ID del MapSection y la posicion de inicio del
-	player, indicado en el export "spawn"
+	es el encargado de arrancar el juego: instancia el mapa y coloca al jugador
+	en él. Usa un Node2D llamado MapContainer como almacenamiento para la escena
+	del mapa y el jugador se integra al nodo EventObj de esa escena de mapa.
+	Tiene tres exports: EscenaPlayer (el Player que ya está dentro de la escena
+	de GameStart), MapaInicial (un MapSection.mapID) y Spawn (la casilla de
+	inicio, un Vector2i en casillas y no en píxeles). En _ready convierte Spawn
+	a píxeles multiplicándolo por Globals.TILE_SIZE y llama a CargarMapa(...).
+
+	todo es posible gracias al método del tipo procedimiento llamado
+	CargarMapa(IDmap, PosicionDestino), que recibe un ID del MapSection y la
+	posición de destino del player en píxeles, y trabaja en este orden. Primero
+	comprueba que EscenaPlayer esté asignado, si no manda un push_error y
+	termina. Segundo, si el Player no es hijo directo de GameStart lo reparenta
+	ahí, esto es importante porque si se quedara dentro del mapa anterior se
+	liberaría junto con él, y enseguida libera el mapa que estaba cargado
+	(MapaActual) con queue_free(). Tercero, busca la ruta de la escena en
+	MapSection.mapScene, si no hay ruta o el archivo no existe manda un
+	push_error con el ID y termina, por eso un ID que todavía no esté registrado
+	en mapScene (o MAPSEC_NONE) no carga nada. Cuarto, instancia la escena como
+	GameMap y la agrega a MapContainer, y en ese momento el mapa corre su propio
+	_ready, que reproduce su música y genera su borde. Quinto, busca el nodo
+	EventObj dentro del mapa y reparenta ahí al Player (si el mapa no tiene
+	EventObj el Player se queda en GameStart) y por último le asigna la posición
+	de destino.
+
+	CargarMapa ya está pensado para cambiar de mapa porque libera el anterior y
+	conserva al Player, pero por ahora solo se usa una vez al iniciar, todavía
+	no hay transiciones entre mapas.

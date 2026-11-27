@@ -1,0 +1,25 @@
+Funciona:
+	movimiento del Player por casillas, caminando y corriendo (correr solo sube
+	la velocidad, todavía sin animación propia), con animaciones de caminar en
+	las cuatro direcciones y sin parpadeo entre casillas. Vista previa en el
+	editor del gráfico y la sombra de cualquier personaje al cambiarlos en el
+	Inspector. Carga de un mapa desde GameStart con el Player colocado en la
+	casilla de inicio. En el editor, el mapa muestra su contorno, su cuadrícula
+	y avisos de tiles fuera de rango. En juego, el mapa reproduce su música y
+	genera el borde repetido a partir del patrón de Behaviour/Borde. El sistema
+	de audio (BGM, ME y SE) con sus buses.
+
+Pendiente:
+	colisiones: la capa Behaviour/Collision y collisions.png existen pero nada
+	las usa. Giro en el sitio antes de caminar. Animaciones de correr
+	(OBJ_KAEL_RUN y OBJ_KAIDA_RUN no tienen png). NPC (la clase Entity ya está
+	pensada para ellos pero no existen Npc ni NpcData). Segundo mapa:
+	MAPSEC_PUEBLO_ALBA está en el enum pero no tiene escena ni entrada en
+	mapScene. Transiciones entre mapas y mapConnection. Los campos de
+	MapAttributes marcados para más adelante, las banderas, mapName, mapID y
+	mapRegionID, y charID y charName de CharacterGame, que se guardan pero nada
+	los lee. Tipar party y bag de PlayerData cuando existan las clases del
+	Pokémon y del objeto. ReproducirBatalla, ReproducirEfectoMusical y
+	ReproducirSe existen pero nadie los llama todavía. Valores explícitos en los
+	enums de MapSection y MusicID. Ajustes de project.godot: escena principal y
+	tamaño de ventana.

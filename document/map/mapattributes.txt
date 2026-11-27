@@ -1,20 +1,29 @@
 MapAttributes:
 	es el recurso con las propiedades editables de un mapa, es @tool y es el que
 	usa GameMap. Tiene mapName, mapID (MapSection.mapID), mapRegionID
-	(MapSection.mapRegionID) y mapSize (Vector2i en casillas, no en píxeles),
-	este último hace emit_changed() en su setter y es lo que provoca que GameMap
-	redibuje el contorno y la cuadrícula. Hay un grupo de campos String marcados
-	con "para más adelante" que todavía no hacen nada: mapScripts,
-	mapConnection, mapMusic, mapWeather, mapBattleType y mapWildEncounter. Y las
-	banderas bool, todas en false por defecto: showLocationName, isIndoor,
-	allowDigEscapeRope, allowFly y requiresFlash.
+	(MapSection.mapRegionID), mapSize (Vector2i en casillas, no en píxeles) y
+	mapMusic (MusicID.MapMusicID). El mapSize hace emit_changed() en su setter y
+	es lo que provoca que GameMap redibuje el contorno y la cuadrícula. El
+	mapMusic es la música que suena al cargar el mapa: GameMap._ready llama a
+	MusicManager.ReproducirMapa(mapMusic) y con BGM_NONE se detiene la música.
+	El mapID debe ser el mismo con el que el mapa está registrado en
+	MapSection.mapScene.
+
+	hay un grupo de campos String marcados con "para más adelante" que todavía
+	no hacen nada: mapScripts, mapConnection, mapWeather, mapBattleType y
+	mapWildEncounter. Y las banderas bool, todas en false por defecto:
+	showLocationName, isIndoor, allowDigEscapeRope, allowFly y requiresFlash.
+	Por ahora mapName, mapID, mapRegionID y las banderas se guardan pero nada
+	las lee todavía.
 
 MapSection:
 	es un RefCounted que solo agrupa identificadores, no se instancia. Tiene el
 	enum mapID (MAPSEC_NONE, MAPSEC_PRADO_NATAL, MAPSEC_PUEBLO_ALBA), el enum
 	mapRegionID (REGION_NONE, REGION_VALTHERION) y la constante mapScene, un
-	Dictionary que más adelante relacionará cada mapID con la ruta de su escena
-	y que por ahora solo tiene la entrada vacía de MAPSEC_NONE. Pendiente: como
-	mapID también se guarda como entero dentro de MapAttributes, conviene darle
-	valores explícitos y seguir la misma regla de ObjEvents (nunca insertar en
-	medio, siempre agregar al final).
+	Dictionary que relaciona cada mapID con la ruta de su escena y es lo que usa
+	GameStart.CargarMapa para encontrarla. Por ahora solo tiene MAPSEC_NONE
+	(vacío) y MAPSEC_PRADO_NATAL, MAPSEC_PUEBLO_ALBA todavía no tiene escena y
+	si se intenta cargar CargarMapa manda un push_error. Pendiente: como mapID y
+	mapRegionID también se guardan como enteros dentro de MapAttributes,
+	conviene darles valores explícitos y seguir la misma regla de ObjEvents
+	(nunca insertar en medio, siempre agregar al final).

@@ -1,0 +1,30 @@
+MusicID:
+	es una clase con class_name que extiende RefCounted y no se instancia,
+	funciona como catálogo de todo el audio, igual que ObjEvents lo hace con los
+	graficos: por cada tipo hay un enum con los ids y un diccionario constante
+	que relaciona cada id con la ruta del archivo .ogg. Son cuatro:
+	BattleMusicID con BATTLE_MUSIC_PATH (32 pistas de batalla y raids, en
+	res://sfx/bgm/), MapMusicID con MAP_MUSIC_PATH (32 pistas de ciudades,
+	rutas, interiores, cuevas y pantallas como el título y los créditos, también
+	en res://sfx/bgm/, donde BGM_NONE significa sin música y su ruta es un
+	string vacío), MusicEffectID con MUSIC_EFFECT_PATH (12 jingles ME_*, en
+	res://sfx/me/) y SoundEffectID con SOUND_EFFECT_PATH (92 efectos SE_*, en
+	res://sfx/se/).
+
+	para no leer los diccionarios directamente se usan los resolvers, funciones
+	static: BattleMusicPath(id), MapMusicPath(id), MusicEffectPath(id) y
+	SoundEffectPath(id), que regresan la ruta o un string vacío si el id no
+	tiene entrada, y PathExists(path), que dice si la ruta no está vacía y el
+	archivo existe. Los archivos llevan espacios y mayúsculas en el nombre (por
+	ejemplo "Battle Champion.ogg") así que al agregar uno hay que copiar la ruta
+	tal cual.
+
+	Regla importante: igual que owID, los ids se guardan como números enteros
+	dentro de los .tscn y .tres, por ejemplo prado_natal.tscn tiene mapMusic =
+	2, que es BGM_LAPPET_TOWN solo por ser la tercera entrada de MapMusicID, y
+	estos enums todavía no tienen valores explícitos. Como están agrupados por
+	temas es fácil querer meter una canción nueva dentro de su grupo, pero eso
+	corre el número de todas las que siguen y cambia en silencio la música de
+	los mapas ya guardados. Por eso los ids nuevos se agregan siempre al final
+	del enum, aunque queden fuera de su grupo, y no se borran ni se reordenan
+	los existentes. Pendiente: darles valores explícitos.

@@ -1,0 +1,35 @@
+Como agregar un mapa:
+	1) registrar el id: agregar MAPSEC_<NOMBRE> al final del enum mapID de
+	MapSection (y si es de una región nueva, REGION_<NOMBRE> al final de
+	mapRegionID).
+	2) crear una escena heredada de scenes/map/map_base.tscn y guardarla en
+	scenes/map/<nombre>/<nombre>.tscn, como prado_natal.
+	3) registrar la ruta de esa escena en el diccionario mapScene de MapSection,
+	con el id del paso 1.
+	4) en el nodo raíz Map crear un MapAttributes nuevo en el export mapAttributes
+	(que sea propio del mapa, no el de map_base) y llenar mapName, mapID (el del
+	paso 1), mapRegionID, mapSize (en casillas) y mapMusic.
+	5) pintar los tiles en Tile0 a Tile4 dentro del contorno verde, lo que quede
+	fuera del mapSize muestra un triángulo amarillo en el árbol de escena y se puede
+	borrar con el botón "Limpiar tiles fuera del mapa" del Inspector.
+	6) dibujar el patrón del borde en Behaviour/Borde (por ejemplo un bloque de 2x2),
+	sin patrón no se genera borde.
+	7) para probarlo, poner el id en MapaInicial y la casilla en Spawn del nodo GameStart
+	de game_start.tscn y correr esa escena.
+
+Como agregar musica o un efecto de sonido:
+	1) poner el archivo .ogg en la carpeta que le toca: res://sfx/bgm/ para
+	música de mapa y de batalla, res://sfx/me/ para los jingles y res://sfx/se/
+	para los efectos de sonido.
+	2) agregar el id AL FINAL del enum que corresponda en MusicID (MapMusicID,
+	BattleMusicID, MusicEffectID o SoundEffectID), aunque quede fuera de su grupo,
+	para no mover los números de los ids ya guardados.
+	3) agregar el id y la ruta en el diccionario de ese enum (MAP_MUSIC_PATH,
+	BATTLE_MUSIC_PATH, MUSIC_EFFECT_PATH o SOUND_EFFECT_PATH), copiando el nombre
+	del archivo tal cual.
+	4) usarlo: la música de un mapa se elige en el campo mapMusic de su MapAttributes,
+	y desde código se llama a MusicManager.ReproducirBatalla(id), ReproducirEfectoMusical(id)
+	o ReproducirSe(id) según el tipo.
+
+Como agregar un personaje:
+	esta explicado en resources.txt, junto a ObjEvents.
