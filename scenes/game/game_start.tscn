@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://b50au8w4n7g7k"]
+
+[ext_resource type="PackedScene" uid="uid://k2d82bumcujs" path="res://scenes/entities/player/player.tscn" id="1_3ihs5"]
+[ext_resource type="Script" uid="uid://7cmwji66gkjm" path="res://scripts/game/game_start.gd" id="1_7v7gh"]
+
+[node name="GameStart" type="Node" unique_id=1207434156 node_paths=PackedStringArray("EscenaPlayer")]
+script = ExtResource("1_7v7gh")
+EscenaPlayer = NodePath("Player")
+MapaInicial = 1
+Spawn = Vector2i(14, 5)
+
+[node name="MapContainer" type="Node2D" parent="." unique_id=907204643]
+
+[node name="Player" parent="." unique_id=397066090 instance=ExtResource("1_3ihs5")]

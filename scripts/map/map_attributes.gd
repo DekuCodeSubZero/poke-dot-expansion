@@ -11,7 +11,7 @@ extends Resource
 		emit_changed()
 @export var mapScripts: String ## --para más adelante--
 @export var mapConnection: String ## --para más adelante--
-@export var mapMusic: String ## --para más adelante--
+@export var mapMusic: MusicID.MapMusicID = MusicID.MapMusicID.BGM_NONE
 @export var mapWeather: String ## --para más adelante--
 @export var mapBattleType: String ## --para más adelante--
 @export var mapWildEncounter: String ## --para más adelante--

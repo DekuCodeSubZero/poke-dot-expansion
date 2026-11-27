@@ -15,4 +15,5 @@ enum mapRegionID {
 
 const mapScene: Dictionary = {
 	mapID.MAPSEC_NONE: "",
+	mapID.MAPSEC_PRADO_NATAL: "res://scenes/map/prado_natal/prado_natal.tscn"
 }

@@ -16,17 +16,22 @@ extends Node2D
 @export_tool_button("Limpiar tiles fuera del mapa", "Clear")
 var BotonLimpiar: Callable = _limpiar_todos_los_tiles
 
+const MARGEN_BORDE: int = 12
 ## Firma del estado anterior (mapSize + área usada de cada capa) para saber si algo cambió.
 var _UltimaFirma: int = 0
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		CambioEnAtributos()
+		return
+	if mapAttributes == null:
+		return
+	MusicManager.ReproducirMapa(mapAttributes.mapMusic)
+	GenerarBordeInfinito()
 
 func _process(_delta: float) -> void:
 	if not Engine.is_editor_hint() or mapAttributes == null:
 		return
-	# Solo reaccionamos si cambió algo; no se redibuja ni se recalcula cada frame.
 	var Firma: int = _calcular_firma()
 	if Firma == _UltimaFirma:
 		return
@@ -57,6 +62,40 @@ func _calcular_firma() -> int:
 	for Capa in _obtener_capas():
 		Firma = Firma * 31 + hash(Capa.get_used_rect())
 	return Firma
+
+func GenerarBordeInfinito() -> void:
+	if not _mapa_valido():
+		return
+	var CapaBorde: Node = get_node_or_null("Behaviour/Borde") as TileMapLayer
+	if CapaBorde == null:
+		return
+	CapaBorde.visible = false
+	var RectPatron: Rect2i = CapaBorde.get_used_rect()
+	if not RectPatron.has_area():
+		return
+	var VisualBorde: TileMapLayer = TileMapLayer.new()
+	VisualBorde.name = "BordeGenerado"
+	VisualBorde.tile_set = CapaBorde.tile_set
+	VisualBorde.z_index = CapaBorde.z_index
+	add_child(VisualBorde)
+	var LimiteMapa: Rect2i = Rect2i(Vector2i.ZERO, mapAttributes.mapSize)
+	var MinX: int = -MARGEN_BORDE
+	var MaxX: int = mapAttributes.mapSize.x + MARGEN_BORDE
+	var MinY: int = -MARGEN_BORDE
+	var MaxY: int = mapAttributes.mapSize.y + MARGEN_BORDE
+	for x in range(MinX, MaxX):
+		for y in range(MinY, MaxY):
+			var CeldaDestino: Vector2i = Vector2i(x, y)
+			if LimiteMapa.has_point(CeldaDestino):
+				continue
+			var PatronX: int = RectPatron.position.x + posmod(x, RectPatron.size.x)
+			var PatronY: int = RectPatron.position.y + posmod(x, RectPatron.size.y)
+			var CeldaOrigen: Vector2i = Vector2i(PatronX, PatronY)
+			var SourceID: int = CapaBorde.get_cell_source_id(CeldaOrigen)
+			if SourceID != -1:
+				var AtlasCoords: Vector2i = CapaBorde.get_cell_atlas_coords(CeldaOrigen)
+				var Alternative: int = CapaBorde.get_cell_alternative_tile(CeldaOrigen)
+				VisualBorde.set_cell(CeldaDestino, SourceID, AtlasCoords, Alternative)
 
 # --- Limpieza (solo bajo demanda) ------------------------------------------
 

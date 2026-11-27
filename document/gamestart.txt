@@ -1,0 +1,8 @@
+GameStart:
+	Encargado de Instanciar al jugador en un mapa usando de contenedor un node2D
+	como almacenamiento para la escena del mapa y el jugador es integrado al nodo
+	EventObj de la escena del mapa.
+	
+	todo es posible gracias al método del tipo procedimiento llamado "CargarMapa"
+	que recibe como argumento un ID del MapSection y la posicion de inicio del
+	player, indicado en el export "spawn"

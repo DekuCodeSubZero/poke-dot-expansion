@@ -3,14 +3,14 @@
 [ext_resource type="Script" uid="uid://ch7s3x8aae421" path="res://scripts/entities/player/player.gd" id="1_58kc7"]
 [ext_resource type="Texture2D" uid="uid://cg0fvuuc136f7" path="res://graphics/obj_event/shadow/shadow_medium.png" id="2_58kc7"]
 [ext_resource type="Script" uid="uid://dmefr8iilcjdv" path="res://scripts/entities/resources/player_data.gd" id="2_bj7e2"]
-[ext_resource type="Texture2D" uid="uid://bw53cp6ymgctk" path="res://graphics/obj_event/kaida/normal.png" id="3_bj7e2"]
+[ext_resource type="Texture2D" uid="uid://bhhkkbe3wvg4q" path="res://graphics/obj_event/kael/normal.png" id="3_bj7e2"]
 [ext_resource type="Script" uid="uid://c6vg7m6kh644k" path="res://scripts/entities/controllers/movement_controller.gd" id="5_bjvvg"]
 [ext_resource type="Script" uid="uid://bjt2p0f5wyqw0" path="res://scripts/entities/controllers/anim_controller.gd" id="6_8akj5"]
 [ext_resource type="Script" uid="uid://t685u1woo7n5" path="res://scripts/entities/controllers/graphics_controller.gd" id="7_bj7e2"]
 
 [sub_resource type="Resource" id="Resource_1mvll"]
 script = ExtResource("2_bj7e2")
-charGraphic = 3
+charGraphic = 1
 charShadowGraphic = 2
 metadata/_custom_type_script = "uid://dmefr8iilcjdv"
 
@@ -235,6 +235,9 @@ modulate = Color(1, 1, 1, 0.29411766)
 z_index = -1
 position = Vector2(-0.5, 11)
 texture = ExtResource("2_58kc7")
+
+[node name="Camera2D" type="Camera2D" parent="Sprite" unique_id=1697111825]
+zoom = Vector2(2, 2)
 
 [node name="MovementController" type="Node" parent="." unique_id=1986627708]
 script = ExtResource("5_bjvvg")
