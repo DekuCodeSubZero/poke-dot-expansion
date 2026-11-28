@@ -5,19 +5,24 @@ GameMap:
 	editor (Engine.is_editor_hint()).
 
 	En primer lugar, escucha los cambios de MapAttributes mediante su señal
-	"changed" (conectada a CambioEnAtributos desde el setter de mapAttributes) y
-	usa _draw() para dibujar el contorno exterior del mapa según mapSize y
-	Globals.TILE_SIZE, actualizándose únicamente cuando cambian los datos en el
-	Inspector. CambioEnAtributos reinicia la firma de estado, pide redibujar con
-	queue_redraw() y refresca los avisos de configuración.
+	"changed" (conectada a CambioEnAtributos desde el setter de mapAttributes).
+	Lo que se dibuja en el editor no lo hace el propio GameMap sino un nodo
+	hijo, GrillaEditor (una clase interna que extiende Node2D), que
+	AsegurarGrilla() agrega en _ready con z_index 100 y z_as_relative en false
+	para que quede por encima de todos los tiles, y como no tiene owner no se
+	guarda en la escena. Su _draw() traza el contorno exterior del mapa según
+	mapSize y Globals.TILE_SIZE, y solo se vuelve a dibujar cuando algo cambia:
+	CambioEnAtributos reinicia la firma de estado, pide redibujar con
+	_redibujar_grilla() y refresca los avisos de configuración.
 
 	En segundo lugar, vigila en _process() los nodos TileMapLayer ubicados
 	dentro del contenedor hijo "TileSet". La función auxiliar _obtener_capas()
 	devuelve solo los hijos que realmente son TileMapLayer (cualquier otro nodo
 	que haya en el contenedor se ignora), y _obtener_limite() arma el Rect2i del
 	mapa a partir de mapSize. Para no trabajar de más, _process calcula una
-	firma (el hash de mapSize combinado con el get_used_rect de cada capa) y
-	solo si cambió respecto a la anterior actualiza los avisos de configuración.
+	firma (el hash de mapSize combinado con el get_used_rect de cada capa y la
+	posición de cada ObjEvent) y solo si cambió respecto a la anterior actualiza
+	los avisos de configuración y redibuja la grilla.
 
 	Las celdas fuera de rango ya no se borran solas. Si el área pintada de
 	alguna capa sobresale del límite del mapa, _get_configuration_warnings()
@@ -31,10 +36,33 @@ GameMap:
 	Es destructivo y no se puede deshacer con Ctrl+Z, por eso solo ocurre cuando
 	se pulsa el botón y ya no al cambiar mapSize.
 
-	Por último, dentro del mismo _draw() traza una cuadrícula interna de 16x16
-	píxeles (Globals.TILE_SIZE) usando dos bucles "for" independientes para
-	columnas y filas, evitando el costo de un bucle anidado y facilitando el
-	diseño de niveles en el editor.
+	Dentro del _draw() de GrillaEditor, además del contorno, se traza una
+	cuadrícula interna de 16x16 píxeles (Globals.TILE_SIZE) usando dos bucles
+	"for" independientes para columnas y filas, evitando el costo de un bucle
+	anidado y facilitando el diseño de niveles en el editor.
+
+	Los ObjEvents son los nodos Node2D que cuelgan de EventObj (los NPC, y el
+	Player cuando se carga el mapa), y como se mueven por casillas necesitan
+	estar siempre en la esquina de una casilla, si no, todos sus pasos quedan
+	desfasados. Para esto ObtenerObjEvents() devuelve los hijos de EventObj,
+	CeldaDe(pos) convierte una posición en píxeles a la casilla del mapa y
+	PosicionAlineada(pos) la redondea a la casilla más cercana con snapped(). El
+	export AlinearObjEventsEnEditor (activo por defecto) hace que _process llame
+	a _alinear_obj_events(), que corrige la posición de cada ObjEvent que no
+	esté alineado, así que en el editor un NPC solo puede quedar en casillas
+	completas, ya sea que se arrastre o que se escriba la posición en el
+	Inspector (145 pasa a 144). Si se desactiva, el botón "Alinear ObjEvents a
+	la cuadrícula" hace lo mismo una sola vez y el aviso de configuración marca
+	los que estén desalineados. Como un cambio hecho por script no marca la
+	escena como modificada, _marcar_escena_modificada() le avisa al editor con
+	mark_scene_as_unsaved() para que Ctrl+S guarde la posición corregida. Esta
+	herramienta nunca actúa en juego (solo con Engine.is_editor_hint()), porque
+	ahí las entidades se mueven libremente entre casillas.
+
+	Además, GrillaEditor pinta la casilla que ocupa cada ObjEvent, en azul si
+	está dentro del mapa y en rojo si está fuera, y
+	_get_configuration_warnings() agrega un aviso con el nombre del nodo y su
+	casilla cuando alguno se sale de mapSize.
 
 	Ya en juego (fuera del editor), _ready() reproduce la música del mapa con
 	MusicManager.ReproducirMapa(mapAttributes.mapMusic) y llama a

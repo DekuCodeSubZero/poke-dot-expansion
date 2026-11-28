@@ -1,0 +1,137 @@
+[gd_scene format=3 uid="uid://cb80xlqtmhraa"]
+
+[ext_resource type="Texture2D" uid="uid://n50xtfmj3rya" path="res://graphics/ui/map_popup/bw_primary.png" id="1_3h011"]
+[ext_resource type="Script" uid="uid://cddqa5gmakmju" path="res://scripts/ui/map_popup/map_popup.gd" id="1_8brou"]
+[ext_resource type="FontFile" uid="uid://bnj6abjao06hb" path="res://data/font/power green.ttf" id="2_8brou"]
+[ext_resource type="Texture2D" uid="uid://muumbyw230w3" path="res://graphics/ui/map_popup/bw_secondary.png" id="3_sn4n0"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_htemk"]
+font = ExtResource("2_8brou")
+font_size = 24
+shadow_size = 0
+shadow_color = Color(0.4, 0.4, 0.4, 0.2627451)
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="Animation" id="Animation_3h011"]
+resource_name = "Entrada"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BG_Primary:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 0.5),
+"update": 0,
+"values": [Vector2(240, -24), Vector2(240, 24)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BG_Secondary:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 0.5),
+"update": 0,
+"values": [Vector2(240, 344), Vector2(240, 296)]
+}
+
+[sub_resource type="Animation" id="Animation_8brou"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BG_Primary:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(240, 24)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BG_Secondary:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(240, 296)]
+}
+
+[sub_resource type="Animation" id="Animation_sn4n0"]
+resource_name = "Salida"
+length = 0.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("BG_Primary:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 0.5),
+"update": 0,
+"values": [Vector2(240, 24), Vector2(240, -24)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BG_Secondary:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 0.5),
+"update": 0,
+"values": [Vector2(240, 296), Vector2(240, 344)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ordkj"]
+_data = {
+&"Entrada": SubResource("Animation_3h011"),
+&"RESET": SubResource("Animation_8brou"),
+&"Salida": SubResource("Animation_sn4n0")
+}
+
+[node name="Map_Popup" type="CanvasLayer" unique_id=1330875162]
+layer = 50
+script = ExtResource("1_8brou")
+
+[node name="BG_Primary" type="Sprite2D" parent="." unique_id=967575392]
+self_modulate = Color(1, 1, 1, 0.60784316)
+position = Vector2(240, 24)
+texture = ExtResource("1_3h011")
+
+[node name="Map_Name" type="Label" parent="BG_Primary" unique_id=1673716765]
+offset_left = -224.0
+offset_top = -24.0
+offset_right = -134.0
+offset_bottom = 2.0
+text = "Map Name"
+label_settings = SubResource("LabelSettings_htemk")
+
+[node name="BG_Secondary" type="Sprite2D" parent="." unique_id=1446400590]
+self_modulate = Color(1, 1, 1, 0.60784316)
+position = Vector2(240, 296)
+texture = ExtResource("3_sn4n0")
+
+[node name="Time" type="Label" parent="BG_Secondary" unique_id=27526685]
+offset_left = 144.0
+offset_top = -10.0
+offset_right = 234.0
+offset_bottom = 16.0
+text = "00:00 PM"
+label_settings = SubResource("LabelSettings_htemk")
+horizontal_alignment = 2
+
+[node name="Popup_Anim" type="AnimationPlayer" parent="." unique_id=1596540464]
+libraries/ = SubResource("AnimationLibrary_ordkj")

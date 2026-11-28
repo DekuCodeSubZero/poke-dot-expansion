@@ -16,6 +16,14 @@ extends Node2D
 @export_tool_button("Limpiar tiles fuera del mapa", "Clear")
 var BotonLimpiar: Callable = _limpiar_todos_los_tiles
 
+## Si está activo, en el editor los ObjEvents (hijos de EventObj) se alinean solos a la
+## cuadrícula de 16x16. En juego nunca actúa, ahí las entidades se mueven libremente.
+@export var AlinearObjEventsEnEditor: bool = true
+
+## Alinea de una vez todos los ObjEvents, útil si desactivaste la opción de arriba.
+@export_tool_button("Alinear ObjEvents a la cuadrícula", "SnapGrid")
+var BotonAlinear: Callable = _alinear_obj_events_manual
+
 const MARGEN_BORDE: int = 12
 ## Firma del estado anterior (mapSize + área usada de cada capa) para saber si algo cambió.
 var _UltimaFirma: int = 0
@@ -28,16 +36,22 @@ func _ready() -> void:
 	if mapAttributes == null:
 		return
 	MusicManager.ReproducirMapa(mapAttributes.mapMusic)
+	MapPopup.IniciarPopUp(mapAttributes.mapName)
 	GenerarBordeInfinito()
 
 func _process(_delta: float) -> void:
-	if not Engine.is_editor_hint() or mapAttributes == null:
+	if not Engine.is_editor_hint():
+		return
+	if AlinearObjEventsEnEditor:
+		_alinear_obj_events()
+	if mapAttributes == null:
 		return
 	var Firma: int = _calcular_firma()
 	if Firma == _UltimaFirma:
 		return
 	_UltimaFirma = Firma
 	update_configuration_warnings()
+	_redibujar_grilla()
 
 # --- Utilidades -------------------------------------------------------------
 
@@ -62,7 +76,62 @@ func _calcular_firma() -> int:
 	var Firma: int = hash(mapAttributes.mapSize)
 	for Capa in _obtener_capas():
 		Firma = Firma * 31 + hash(Capa.get_used_rect())
+	for Obj in ObtenerObjEvents():
+		Firma = Firma * 31 + hash(Obj.position)
 	return Firma
+
+# --- ObjEvents sobre la cuadrícula -------------------------------------------
+
+## Devuelve los Node2D hijos de EventObj (los ObjEvents del mapa).
+func ObtenerObjEvents() -> Array[Node2D]:
+	var Lista: Array[Node2D] = []
+	var Contenedor: Node = get_node_or_null("EventObj")
+	if Contenedor == null:
+		return Lista
+	for Hijo in Contenedor.get_children():
+		if Hijo is Node2D:
+			Lista.append(Hijo as Node2D)
+	return Lista
+
+## Casilla (en coordenadas de mapa) en la que está una posición en píxeles.
+func CeldaDe(pos: Vector2) -> Vector2i:
+	return Vector2i((pos / float(Globals.TILE_SIZE)).floor())
+
+## Posición en píxeles de la esquina de la casilla más cercana.
+func PosicionAlineada(pos: Vector2) -> Vector2:
+	return pos.snapped(Vector2(Globals.TILE_SIZE, Globals.TILE_SIZE))
+
+## Alinea cada ObjEvent a su casilla más cercana y regresa cuántos tuvo que mover.
+func _alinear_obj_events() -> int:
+	var Movidos: int = 0
+	for Obj in ObtenerObjEvents():
+		var Alineada: Vector2 = PosicionAlineada(Obj.position)
+		if not Obj.position.is_equal_approx(Alineada):
+			Obj.position = Alineada
+			Movidos += 1
+	if Movidos > 0:
+		_marcar_escena_modificada()
+	return Movidos
+
+func _alinear_obj_events_manual() -> void:
+	if not Engine.is_editor_hint():
+		return
+	var Movidos: int = _alinear_obj_events()
+	print("GameMap: se alinearon %d ObjEvents a la cuadrícula." % Movidos)
+
+## Un cambio hecho por script no marca la escena como modificada, así que se lo avisamos
+## al editor para que Ctrl+S realmente guarde la posición corregida.
+func _marcar_escena_modificada() -> void:
+	if not Engine.has_singleton("EditorInterface"):
+		return
+	var Interfaz: Object = Engine.get_singleton("EditorInterface")
+	if Interfaz.has_method("mark_scene_as_unsaved"):
+		Interfaz.call("mark_scene_as_unsaved")
+
+func _redibujar_grilla() -> void:
+	var Grilla: Node = get_node_or_null("GrillaEditor")
+	if Grilla != null:
+		Grilla.queue_redraw()
 
 func GenerarBordeInfinito() -> void:
 	if not _mapa_valido():
@@ -133,6 +202,12 @@ func _get_configuration_warnings() -> PackedStringArray:
 		var Usado: Rect2i = Capa.get_used_rect()
 		if Usado.has_area() and not Limite.encloses(Usado):
 			Avisos.append("%s tiene celdas fuera del mapa. Usa el botón 'Limpiar tiles fuera del mapa' si quieres borrarlas." % Capa.name)
+	for Obj in ObtenerObjEvents():
+		var Celda: Vector2i = CeldaDe(Obj.position)
+		if not Limite.has_point(Celda):
+			Avisos.append("%s está fuera del mapa (casilla %s)." % [Obj.name, Celda])
+		elif not AlinearObjEventsEnEditor and not Obj.position.is_equal_approx(PosicionAlineada(Obj.position)):
+			Avisos.append("%s no está alineado a la cuadrícula (posición %s). Usa el botón 'Alinear ObjEvents a la cuadrícula'." % [Obj.name, Obj.position])
 	return Avisos
 
 # --- Dibujo -----------------------------------------------------------------
@@ -148,12 +223,13 @@ func AsegurarGrilla() -> void:
 
 func CambioEnAtributos() -> void:
 	_UltimaFirma = 0
-	var Grilla := get_node_or_null("GrillaEditor")
-	if Grilla != null:
-		Grilla.queue_redraw()
+	_redibujar_grilla()
 	update_configuration_warnings()
 
 class GrillaEditor extends Node2D:
+	const COLOR_OBJ_DENTRO: Color = Color(0.2, 0.6, 1.0, 0.35)
+	const COLOR_OBJ_FUERA: Color = Color(1.0, 0.2, 0.2, 0.45)
+
 	func _draw() -> void:
 		var Mapa:GameMap = get_parent() as GameMap
 		if Mapa == null or not Engine.is_editor_hint():
@@ -171,3 +247,11 @@ class GrillaEditor extends Node2D:
 			var pos_y: float = y * Globals.TILE_SIZE
 			draw_line(Vector2(0, pos_y), Vector2(TamanoPixeles.x, pos_y), ColorCuadricula, 1.0)
 		draw_rect(Rect2(Vector2.ZERO, TamanoPixeles), Color.LIGHT_GREEN, false, 1.0)
+		# Casilla que ocupa cada ObjEvent: azul si está dentro del mapa, roja si está fuera.
+		var Limite: Rect2i = Rect2i(Vector2i.ZERO, Mapa.mapAttributes.mapSize)
+		for Obj in Mapa.ObtenerObjEvents():
+			var Celda: Vector2i = Mapa.CeldaDe(Obj.position)
+			var Relleno: Color = COLOR_OBJ_DENTRO if Limite.has_point(Celda) else COLOR_OBJ_FUERA
+			var Rect: Rect2 = Rect2(Vector2(Celda * Globals.TILE_SIZE), Vector2(Globals.TILE_SIZE, Globals.TILE_SIZE))
+			draw_rect(Rect, Relleno)
+			draw_rect(Rect, Relleno.lightened(0.4), false, 1.0)

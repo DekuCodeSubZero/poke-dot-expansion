@@ -16,11 +16,9 @@ metadata/_custom_type_script = "uid://dk5kmdwp2s1ox"
 
 [sub_resource type="Resource" id="Resource_gqvq0"]
 script = ExtResource("4_aubj7")
-npcBehaviour = 3
+npcBehaviour = 2
 charGraphic = 3
 charShadowGraphic = 2
-walkSpeed = 0.3
-runSpeed = 0.6
 metadata/_custom_type_script = "uid://dlfqkgg7g40u8"
 
 [node name="Map" unique_id=419804433 instance=ExtResource("1_6yrr0")]
@@ -39,5 +37,5 @@ visible = false
 tile_map_data = PackedByteArray("AAAAAAAAAAAAAAUAAAABAAAAAAABAAUAAAAAAAEAAAAAAAQAAAABAAEAAAABAAQAAAA=")
 
 [node name="Npc" parent="EventObj" parent_id_path=PackedInt32Array(786117529) index="0" unique_id=160278220 instance=ExtResource("3_kvubs")]
-position = Vector2(145, 80)
+position = Vector2(128, 80)
 character = SubResource("Resource_gqvq0")

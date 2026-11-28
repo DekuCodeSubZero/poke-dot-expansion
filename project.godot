@@ -21,6 +21,7 @@ buses/default_bus_layout="uid://bgj41uewyw7u2"
 [autoload]
 
 MusicManager="*uid://d205ege6b7ivq"
+MapPopup="*uid://cb80xlqtmhraa"
 
 [display]
 

@@ -6,11 +6,13 @@ var TiempoRestante: float = 0.0
 var Rotando: bool = false
 var DesplazamientoPasos: Vector2i = Vector2i.ZERO
 
+func _ready() -> void:
+	TiempoRestante = randf_range(0.0, 2.5)
+
 func AplicarComportamiento(npc: Entity ,behaviourID: ObjEventMovement.MovementTypeID, delta: float) -> void:
 	if npc.movementController == null or npc.animController == null:
 		return
 	if behaviourID == ObjEventMovement.MovementTypeID.NONE:
-		print("sin comportamientos")
 		return
 	if ObjEventMovement.DIRECCIONES_PERMITIDAS.has(behaviourID):
 		VerificarDireccionPermitida(npc, behaviourID, delta)
