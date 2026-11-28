@@ -11,7 +11,8 @@
 
 [sub_resource type="Resource" id="Resource_6u2ft"]
 script = ExtResource("2_fgogi")
-npcBehaviour = 10
+npcBehaviour = 22
+RangoMovimiento = null
 charGraphic = 3
 charShadowGraphic = 2
 walkSpeed = 0.0

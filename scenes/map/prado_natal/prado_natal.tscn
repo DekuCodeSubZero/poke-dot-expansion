@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://b4vttb3mdlttb" path="res://scenes/map/map_base.tscn" id="1_6yrr0"]
 [ext_resource type="Script" uid="uid://dk5kmdwp2s1ox" path="res://scripts/map/map_attributes.gd" id="2_jwrig"]
 [ext_resource type="PackedScene" uid="uid://doolveldglbsw" path="res://scenes/entities/npc/npc.tscn" id="3_kvubs"]
+[ext_resource type="Script" uid="uid://dlfqkgg7g40u8" path="res://scripts/entities/resources/npc_data.gd" id="4_aubj7"]
 
 [sub_resource type="Resource" id="Resource_jwrig"]
 script = ExtResource("2_jwrig")
@@ -12,6 +13,15 @@ mapRegionID = 1
 mapSize = Vector2i(30, 20)
 mapMusic = 2
 metadata/_custom_type_script = "uid://dk5kmdwp2s1ox"
+
+[sub_resource type="Resource" id="Resource_gqvq0"]
+script = ExtResource("4_aubj7")
+npcBehaviour = 3
+charGraphic = 3
+charShadowGraphic = 2
+walkSpeed = 0.3
+runSpeed = 0.6
+metadata/_custom_type_script = "uid://dlfqkgg7g40u8"
 
 [node name="Map" unique_id=419804433 instance=ExtResource("1_6yrr0")]
 mapAttributes = SubResource("Resource_jwrig")
@@ -30,3 +40,4 @@ tile_map_data = PackedByteArray("AAAAAAAAAAAAAAUAAAABAAAAAAABAAUAAAAAAAEAAAAAAAQ
 
 [node name="Npc" parent="EventObj" parent_id_path=PackedInt32Array(786117529) index="0" unique_id=160278220 instance=ExtResource("3_kvubs")]
 position = Vector2(145, 80)
+character = SubResource("Resource_gqvq0")

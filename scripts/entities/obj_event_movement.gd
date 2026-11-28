@@ -24,6 +24,8 @@ enum MovementTypeID {
 	FACE_DOWN_UP_AND_RIGHT,
 	FACE_UP_LEFT_AND_RIGHT,
 	FACE_DOWN_LEFT_AND_RIGHT,
+	ROTATE_COUNTERCLOCKWISE,
+	ROTATE_CLOCKWISE,
 }
 
 const DIRECCIONES_PERMITIDAS: Dictionary = {
@@ -42,4 +44,17 @@ const DIRECCIONES_PERMITIDAS: Dictionary = {
 	MovementTypeID.FACE_DOWN_UP_AND_RIGHT: [Vector2.DOWN, Vector2.UP, Vector2.RIGHT],
 	MovementTypeID.FACE_UP_LEFT_AND_RIGHT: [Vector2.UP, Vector2.LEFT, Vector2.RIGHT],
 	MovementTypeID.FACE_DOWN_LEFT_AND_RIGHT: [Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT],
+}
+
+const DIRECCION_HORARIA: Dictionary = {
+	MovementTypeID.ROTATE_COUNTERCLOCKWISE: [Vector2.DOWN, Vector2.LEFT, Vector2.UP, Vector2.RIGHT],
+	MovementTypeID.ROTATE_CLOCKWISE: [Vector2.DOWN, Vector2.RIGHT, Vector2.UP, Vector2.LEFT]
+}
+
+const DIRECCIONES_WANDER: Dictionary = {
+	MovementTypeID.WANDER_AROUND: [Vector2.DOWN, Vector2.UP, Vector2.LEFT, Vector2.RIGHT],
+	MovementTypeID.WANDER_UP_AND_DOWN: [Vector2.UP, Vector2.DOWN],
+	MovementTypeID.WANDER_DOWN_AND_UP: [Vector2.DOWN, Vector2.UP],
+	MovementTypeID.WANDER_LEFT_AND_RIGHT: [Vector2.LEFT, Vector2.RIGHT],
+	MovementTypeID.WANDER_RIGHT_AND_LEFT: [Vector2.RIGHT, Vector2.LEFT],
 }
